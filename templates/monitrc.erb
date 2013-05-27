@@ -34,7 +34,7 @@ set logfile <%= @logfile %>
 ### Monit instance. The id is generated and stored on first Monit start. By 
 ### default the file is placed in $HOME/.monit.id.
 #
-  set idfile /var/lib/monit/id
+set idfile /var/lib/monit/id
 #
 ### Set the location of the Monit state file which saves monitoring states
 ### on each cycle. By default the file is placed in $HOME/.monit.state. If
@@ -42,7 +42,7 @@ set logfile <%= @logfile %>
 ### the monitoring state across reboots. If it is on temporary filesystem, the
 ### state will be lost on reboot which may be convenient in some situations.
 #
-  set statefile /var/lib/monit/state
+set statefile /var/lib/monit/state
 #
 ## Set the list of mail servers for alert delivery. Multiple servers may be 
 ## specified using a comma separator. By default Monit uses port 25 - it is
@@ -61,15 +61,17 @@ set mailserver <%= mailserver %>
 ## size using the SLOTS option (if omitted, the queue is limited by space 
 ## available in the back end filesystem).
 #
-#  set eventqueue
-#      basedir /var/lib/monit/events # set the base directory where events will be stored
-#      slots 100                     # optionally limit the queue size
+set eventqueue
+    basedir /var/lib/monit/events # set the base directory where events will be stored
+    slots 500                     # optionally limit the queue size
 #
 #
 ## Send status and events to M/Monit (for more informations about M/Monit 
 ## see http://mmonit.com/).
 #
-# set mmonit http://monit:monit@192.168.1.10:8080/collector
+<% if @mmonit and ! @mmonit.empty? -%>
+set mmonit <%= @mmonit %>
+<% end -%>
 #
 #
 ## Monit by default uses the following alert mail format:
@@ -93,7 +95,9 @@ set mailserver <%= mailserver %>
 ## or sender using the MAIL-FORMAT statement. Macros such as $DATE, etc.
 ## are expanded at runtime. For example, to override the sender, use:
 #
-# set mail-format { from: monit@foo.bar }
+<% if @mailformat and ! @mailformat.empty? -%>
+set mail-format <%= @mailformat %>
+<% end -%>
 #
 #
 ## You can set alert recipients whom will receive alerts if/when a 
@@ -111,9 +115,10 @@ set alert <%= @admin %>                       # receive all alerts
 ## services monitored and manage services from a web interface. See the
 ## Monit Wiki if you want to enable SSL for the web server. 
 #
-set httpd port 2812 and
-    use address localhost  # only accept connection from localhost
-    allow localhost        # allow localhost to connect to the server and
+<% if @httpd and ! @httpd.empty? -%>
+set httpd <%= @httpd %>
+<% end -%>    
+#     allow localhost        # allow localhost to connect to the server and
 #     allow admin:monit      # require user 'admin' with password 'monit'
 #     allow @monit           # allow users of group 'monit' to connect (rw)
 #     allow @users readonly  # allow users of group 'users' to connect readonly

@@ -32,13 +32,13 @@ class monit (
   $interval   = 60,
   $delay      = undef,
   $logfile    = $monit::params::logfile,
-  $mailserver = 'localhost', 
-) inherits monit::params {
-
+  $mailserver = 'localhost',
+  $mmonit     = undef,
+  $mailformat = undef,
+  $httpd      = undef) inherits monit::params {
   if ($delay == undef) {
     $use_delay = $interval * 2
-  }
-  else {
+  } else {
     $use_delay = $delay
   }
 
@@ -52,11 +52,9 @@ class monit (
     $service_state = 'stopped'
   }
 
-  package { $monit::params::monit_package:
-    ensure => $ensure,
-  }
+  package { $monit::params::monit_package: ensure => $ensure, }
 
-  # Template uses: $admin, $conf_include, $interval, $logfile
+  # Template uses: $admin, $conf_include, $interval, $logfile, $mmonit, $mailformat, $httpd
   file { $monit::params::conf_file:
     ensure  => $ensure,
     content => template('monit/monitrc.erb'),
@@ -66,23 +64,25 @@ class monit (
   }
 
   file { $monit::params::conf_dir:
-    ensure => directory,
-    owner  => 'root',
-    group  => 'root',
-    mode   => '0755',
+    ensure  => directory,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0755',
+    require => Package[$monit::params::monit_package],
   }
 
   # Not all platforms need this
   if ($monit::params::default_conf) {
-   if ($monit::params::default_conf_tpl) {
-    file { $monit::params::default_conf:
-      ensure  => $ensure,
-      content => template("monit/$monit::params::default_conf_tpl"),
-      require => Package[$monit::params::monit_package],
-    }
+    if ($monit::params::default_conf_tpl) {
+      file { $monit::params::default_conf:
+        ensure  => $ensure,
+        content => template("monit/$monit::params::default_conf_tpl"),
+        require => Package[$monit::params::monit_package],
+      }
 
-   }
-   else { fail("You need to provide config template")}
+    } else {
+      fail("You need to provide config template")
+    }
 
   }
 
@@ -99,9 +99,6 @@ class monit (
     hasrestart => true,
     hasstatus  => true,
     subscribe  => File[$monit::params::conf_file],
-    require    => [
-      File[$monit::params::conf_file],
-      File[$monit::params::logrotate_script]
-    ],
+    require    => [File[$monit::params::conf_file], File[$monit::params::logrotate_script]],
   }
 }
