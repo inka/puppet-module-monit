@@ -31,19 +31,20 @@ define monit::monitor_process (
   $pidfile,
   $ensure        = present,
   $ip_port       = 0,
+  $protocol      = undef,
   $socket        = undef,
-  $checks        = [ ],
+  $checks        = [],
   $start_script  = "/etc/init.d/${name} start",
   $stop_script   = "/etc/init.d/${name} stop",
   $start_timeout = undef,
   $stop_timeout  = undef,
   $group         = $name,
   $uid           = '',
-  $gid           = '',
-) {
+  $gid           = '',) {
   include monit::params
 
-  # Template uses: $pidfile, $ip_port, $socket, $checks, $start_script, $stop_script, $start_timeout, $stop_timeout, $group, $uid, $gid
+  # Template uses: $pidfile, $ip_port, $protocol, $socket, $checks, $start_script, $stop_script, $start_timeout,
+  # $stop_timeout, $group, $uid, $gid
   file { "${monit::params::conf_dir}/$name.conf":
     ensure  => $ensure,
     content => template('monit/process.conf.erb'),

@@ -14,7 +14,7 @@ Installation
 Clone this repo to a monit directory under your Puppet
 modules directory:
 
-    git clone git://github.com/uggedal/puppet-module-monit.git monit
+    git clone git://github.com/puppetmodules/puppet-module-monit.git monit
 
 If you don't have a Puppet Master you can create a manifest file
 based on the notes below and run Puppet in stand-alone mode
@@ -38,20 +38,20 @@ the module with this special syntax:
 Setting up monitoring of processes is done with the `monit::site` resource.
 Note that the name needs to be the same as an init script in `/etc/init.d`:
 
-    monit::monitor { "ssh":
+    monit::monitor_process { "ssh":
       pidfile => "/var/run/sshd.pid",
     }
 
 You can specify a IP port to check if you're running a network process:
 
-    monit::monitor { "nginx":
+    monit::monitor_process { "nginx":
       pidfile => "/var/run/nginx.pid",
       ip_port => 22,
     }
 
 Alternatively you can specify a Unix socket to check:
 
-    monit::monitor { "gunicorn-blog":
+    monit::monitor_process { "gunicorn-blog":
       pidfile => "/var/run/gunicorn/blog.pid",
       socket => "/var/run/gunicorn/blog.sock",
     }
@@ -60,10 +60,16 @@ You can also provide additional checks:
 
     $reload_blog = "/etc/init.d/gunicorn-blog reload"
 
-    monit::monitor { "gunicorn-blog":
+    monit::monitor_process { "gunicorn-blog":
       pidfile => "/var/run/gunicorn/blog.pid",
       socket => "/var/run/gunicorn/blog.sock",
       checks => ["if totalmem > 300 MB for 2 cycles then exec \"$reload_blog\"",
                  "if totalmem > 300 MB for 3 cycles then restart",
                  "if cpu > 50% for 2 cycles then alert"],
+    }
+
+For system monitoring use:
+
+    monit::monitor_system { 'system-watch':
+      checks => ['if loadavg(1min) > 4 for 18 cycles then alert'],
     }

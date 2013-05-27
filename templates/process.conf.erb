@@ -8,7 +8,7 @@ check process <%= @name %> with pidfile <%= @pidfile %>
     with timeout <%= @stop_timeout %> seconds
 <% end -%>
 <% if @ip_port.to_i > 0 -%>
-  if failed port <%= @ip_port %> then restart
+  if failed port <%= @ip_port %><%= " protocol #{protocol}" if protocol != '' %> then restart
 <% elsif @socket -%>
   if failed unixsocket <%= @socket %> then restart
 <% end -%>
